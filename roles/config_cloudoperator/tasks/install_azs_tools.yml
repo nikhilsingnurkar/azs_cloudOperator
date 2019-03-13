@@ -1,0 +1,28 @@
+---
+- name: Create directory AzureStack Tools
+  win_file:
+    path: C:\AzS_Tools
+    state: directory
+
+- name: Download AzureStack Tools zip
+  win_get_url:
+    url: https://github.com/Azure/AzureStack-Tools/archive/master.zip 
+    dest: C:\AzS_Tools\AzureStack_Tools.zip
+    skip_certificate_validation: true
+    force: no
+  register: azs_tools_download_output
+
+- name: azs_tools_download_output
+  debug:
+    var: azs_tools_download_output
+
+- name: Unzip AzureStack_Tools.zip file
+  win_unzip:
+    src: C:\AzS_Tools\AzureStack_Tools.zip
+    dest: C:\AzS_Tools\AzureStack_Tools
+    creates: C:\AzS_Tools\AzureStack_Tools
+  register: unzip_azs_tools_output
+
+- name: Output the result of unzip azs tools
+  debug:
+    var: unzip_azs_tools_output

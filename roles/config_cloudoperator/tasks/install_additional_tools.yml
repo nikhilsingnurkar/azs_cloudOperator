@@ -1,0 +1,86 @@
+---
+###
+# Install Notepad++
+###
+- name: check if OS is 64-bit or 32-bit
+  win_shell: (gwmi win32_operatingsystem | select osarchitecture).osarchitecture
+  register: os_bit_version
+  when: ansible_os_family == 'Windows'
+
+- name: Output Windows OS is 64-bit or 32-bit
+  debug: var=os_bit_version.stdout
+  when: os_bit_version.stdout.find('64') != -1
+
+- name: Installing Notepad++
+  win_package:
+    path: https://notepad-plus-plus.org/repository/7.x/7.6.4/npp.7.6.4.Installer.x64.exe
+    arguments: '/S'
+    product_id: "Notepad++"
+    state: present
+  when: ansible_os_family == 'Windows' and (os_bit_version.stdout.find('64') != -1 )
+
+- name: Check Path Variable on Windows hosts
+  win_shell: $Env:Path
+  register: path
+  changed_when: False
+  when: ansible_os_family == 'Windows'
+
+- name: Add Notepad++ to Path Variable on Windows hosts
+  win_environment:
+    state: present
+    name: Path
+    value: '{{ path.stdout }};C:\Program Files (x86)\Notepad++'
+    level: machine
+  when: (path.stdout.find('Notepad++') == -1 ) and
+        (ansible_os_family == 'Windows')
+
+###
+# Install VS Code
+###
+- name: Installing VS Code
+  win_package:
+    path: https://az764295.vo.msecnd.net/stable/05f146c7a8f7f78e80261aa3b2a2e642586f9eb3/VSCodeSetup-x64-1.32.1.exe
+    arguments: '/VERYSILENT /MERGETASKS=!runcode'
+    product_id: "VSCode"
+    state: present
+  when: ansible_os_family == 'Windows' and (os_bit_version.stdout.find('64') != -1 )
+
+###
+# Install Putty
+###
+- name: Installing Putty
+  win_package:
+    path: https://the.earth.li/~sgtatham/putty/latest/w64/putty-64bit-0.70-installer.msi
+    arguments: '/qn'
+    product_id: "putty"
+    state: present
+  when: ansible_os_family == 'Windows' and (os_bit_version.stdout.find('64') != -1 )
+
+###
+# Install Azure Storage Explorer
+###
+#- name: Installing Azure Storage Explorer
+#  win_package:
+#    path: https://download.microsoft.com/download/A/E/3/AE32C485-B62B-4437-92F7-8B6B2C48CB40/StorageExplorer.exe 
+#    arguments: '/VERYSILENT /MERGETASKS=!runcode'
+#    product_id: "StorageExplorer"
+#    state: present
+#  when: ansible_os_family == 'Windows' and (os_bit_version.stdout.find('64') != -1 )
+
+###
+# Install Git
+###
+- name: Download powershell packages zip
+  win_get_url:
+    url: https://github.com/git-for-windows/git/releases/download/v2.21.0.windows.1/Git-2.21.0-64-bit.exe
+    dest: C:\AzS_Tools
+    skip_certificate_validation: true
+    force: yes
+
+- name: Installing Git
+  win_package:
+    path: 'C:\AzS_Tools\Git-2.21.0-64-bit.exe'
+    arguments: '/SILENT /TYPE="full" /COMPONENTS="*paren"'
+    product_id: "git"
+    state: present
+  when: ansible_os_family == 'Windows' and (os_bit_version.stdout.find('64') != -1 )

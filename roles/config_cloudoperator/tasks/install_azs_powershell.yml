@@ -1,0 +1,59 @@
+---
+#- name: install powershellget and packagemanagement
+#  win_shell: |
+#    Install-PackageProvider NuGet -Force
+#    Import-PackageProvider NuGet -Force
+#  register: installation_output
+#
+#- debug: var=installation_output
+#
+#- name: Create directory AzureStack Tools
+#  win_file:
+#    path: C:\AzS_Tools
+#    state: directory
+#
+#- name: Download powershell packages zip
+#  win_get_url:
+#    url: https://github.com/nikhilsingnurkar/azs_powershell_modules_1811/raw/master/azs_powershell_modules.zip
+#    dest: C:\AzS_Tools
+#    skip_certificate_validation: true
+#    force: no
+#
+#- name: Unzip a azs_powershell_modules.zip file
+#  win_unzip:
+#    src: C:\AzS_Tools\azs_powershell_modules.zip
+#    dest: C:\AzS_Tools\azs_powershell_modules
+#    creates: C:\AzS_Tools\azs_powershell_modules
+
+- name: run powershell script to install azs-powershell-modules
+  win_shell: |
+    #requires -Version 5
+    #requires -RunAsAdministrator
+    #requires -Module PowerShellGet
+    #requires -Module PackageManagement
+
+    $SourceLocation = "C:\azs_powershell_mods_1811"
+    $RepoName = "AzSNuGetSource"
+    Register-PSRepository -Name $RepoName -SourceLocation $SourceLocation  -InstallationPolicy Trusted
+    
+    Get-Module -Name Azs.* -ListAvailable | Uninstall-Module -Force -Verbose
+    Get-Module -Name Azure* -ListAvailable | Uninstall-Module -Force -Verbose
+    
+    Install-Module -Name PowerShellGet -Repository $RepoName
+    Install-Module -Name PackageManagement -Repository $RepoName
+    Install-Module -Name AzureRM -Repository $RepoName
+    Install-Module -Name AzureStack -Repository $RepoName
+    Install-Module -Name Azure.Storage -Repository $RepoName
+    Install-Module -Name AzureRm.Storage -Repository $RepoName
+    Install-Module -Name Microsoft.AzureStack.ReadinessChecker -Repository $RepoName
+
+    Get-Module -Name "Azure*" -ListAvailable
+    Get-Module -Name "Azs*" -ListAvailable
+    Get-Module -Name "Microsoft.AzureStack.ReadinessChecker" -ListAvailable
+  become: yes
+  become_user: "{{ admin_user }}"
+  register: install_ps_modules_output
+
+- name: Output the result of powershell module installation
+  debug:
+    var: install_ps_modules_output

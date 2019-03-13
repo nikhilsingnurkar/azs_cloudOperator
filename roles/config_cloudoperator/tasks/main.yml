@@ -1,0 +1,5 @@
+---
+# tasks file for config_cloudoperator
+#- include: install_azs_powershell.yml
+#- include: install_azs_tools.yml
+- include: install_additional_tools.yml 
