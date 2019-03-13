@@ -80,7 +80,7 @@
 - name: Installing Git
   win_package:
     path: 'C:\AzS_Tools\Git-2.21.0-64-bit.exe'
-    arguments: '/SILENT /TYPE="full" /COMPONENTS="*paren"'
+    arguments: '/SILENT /TYPE="full" /COMPONENTS="icons,ext\reg\shellhere,assoc,assoc_sh" /GROUP="Git" /PATHOPTION="Cmd" /SSHOPTION="OpenSSH" /CRLFOPTION="CRLFAlways"'
     product_id: "git"
     state: present
   when: ansible_os_family == 'Windows' and (os_bit_version.stdout.find('64') != -1 )
